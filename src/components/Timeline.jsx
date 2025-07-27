@@ -1,11 +1,21 @@
-import { useRef, useState } from 'react'
-import './Timeline.css'
+import { useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { setIsDragging } from '../store/slices/viewStateSlice'
+import { useVideoControls } from '../hooks/useVideoControls'
+import { formatTime, generateRulerMarks } from '../utils/videoUtils'
+import styles from './Timeline.module.scss'
 
-const Timeline = ({ currentTime, duration, onSeek, trimStart, trimEnd, onTrimChange }) => {
+const Timeline = () => {
+  const dispatch = useDispatch()
   const timelineRef = useRef(null)
-  const [isDragging, setIsDragging] = useState(null)
+  const { handleSeek, handleTrimChange } = useVideoControls()
+  
+  const { currentTime, duration, trimStart, trimEnd } = useSelector(
+    (state) => state.videoData
+  )
+  const { isDragging } = useSelector((state) => state.viewState)
 
-  const handleClick = (event) => {
+  const handleTimelineClick = (event) => {
     const timeline = timelineRef.current
     if (!timeline || !duration) return
 
@@ -15,13 +25,13 @@ const Timeline = ({ currentTime, duration, onSeek, trimStart, trimEnd, onTrimCha
     const clickRatio = clickX / timelineWidth
     const newTime = clickRatio * duration
 
-    onSeek(Math.max(0, Math.min(duration, newTime)))
+    handleSeek(Math.max(0, Math.min(duration, newTime)))
   }
 
   const handleTrimHandleMouseDown = (event, handle) => {
     event.preventDefault()
     event.stopPropagation()
-    setIsDragging(handle)
+    dispatch(setIsDragging(handle))
     
     const handleMouseMove = (moveEvent) => {
       if (!timelineRef.current || !duration) return
@@ -33,15 +43,15 @@ const Timeline = ({ currentTime, duration, onSeek, trimStart, trimEnd, onTrimCha
 
       if (handle === 'start') {
         const clampedStart = Math.max(0, Math.min(newTime, trimEnd - 0.1))
-        onTrimChange(clampedStart, trimEnd)
+        handleTrimChange(clampedStart, trimEnd)
       } else if (handle === 'end') {
         const clampedEnd = Math.max(trimStart + 0.1, Math.min(newTime, duration))
-        onTrimChange(trimStart, clampedEnd)
+        handleTrimChange(trimStart, clampedEnd)
       }
     }
 
     const handleMouseUp = () => {
-      setIsDragging(null)
+      dispatch(setIsDragging(null))
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
@@ -50,28 +60,31 @@ const Timeline = ({ currentTime, duration, onSeek, trimStart, trimEnd, onTrimCha
     document.addEventListener('mouseup', handleMouseUp)
   }
 
+
   const progressPercentage = duration ? (currentTime / duration) * 100 : 0
   const trimStartPercentage = duration ? (trimStart / duration) * 100 : 0
   const trimEndPercentage = duration ? (trimEnd / duration) * 100 : 0
 
+  const rulerMarks = generateRulerMarks(duration)
+
   return (
-    <div className="timeline-container">
-      <div className="timeline-header">
-        <span className="timeline-duration">
-          {Math.floor(duration / 60).toString().padStart(2, '0')}:{Math.floor(duration % 60).toString().padStart(2, '0')}
+    <div className={styles.timelineContainer}>
+      <div className={styles.timelineHeader}>
+        <span className={styles.timelineDuration}>
+          {formatTime(duration)}
         </span>
       </div>
       
       <div
         ref={timelineRef}
-        className="timeline"
-        onClick={handleClick}
+        className={styles.timeline}
+        onClick={handleTimelineClick}
       >
-        <div className="timeline-track">
-          <div className="timeline-background" />
+        <div className={styles.timelineTrack}>
+          <div className={styles.timelineBackground} />
           
           <div
-            className="trim-selection"
+            className={styles.trimSelection}
             style={{
               left: `${trimStartPercentage}%`,
               width: `${trimEndPercentage - trimStartPercentage}%`
@@ -79,44 +92,43 @@ const Timeline = ({ currentTime, duration, onSeek, trimStart, trimEnd, onTrimCha
           />
           
           <div
-            className="playhead"
+            className={styles.playhead}
             style={{ left: `${progressPercentage}%` }}
           />
           
           <div
-            className={`trim-handle trim-handle-left ${isDragging === 'start' ? 'dragging' : ''}`}
+            className={`${styles.trimHandle} ${styles.left} ${
+              isDragging === 'start' ? styles.dragging : ''
+            }`}
             style={{ left: `${trimStartPercentage}%` }}
             onMouseDown={(e) => handleTrimHandleMouseDown(e, 'start')}
           >
-            <div className="handle-line" />
-            <div className="handle-grip" />
+            <div className={styles.handleLine} />
+            <div className={styles.handleGrip} />
           </div>
           
           <div
-            className={`trim-handle trim-handle-right ${isDragging === 'end' ? 'dragging' : ''}`}
+            className={`${styles.trimHandle} ${styles.right} ${
+              isDragging === 'end' ? styles.dragging : ''
+            }`}
             style={{ left: `${trimEndPercentage}%` }}
             onMouseDown={(e) => handleTrimHandleMouseDown(e, 'end')}
           >
-            <div className="handle-line" />
-            <div className="handle-grip" />
+            <div className={styles.handleLine} />
+            <div className={styles.handleGrip} />
           </div>
           
-          <div className="time-ruler">
-            {Array.from({ length: Math.ceil(duration / 10) + 1 }, (_, i) => {
-              const time = i * 10
-              if (time > duration) return null
-              const position = (time / duration) * 100
-              return (
-                <div
-                  key={i}
-                  className="ruler-mark"
-                  style={{ left: `${position}%` }}
-                >
-                  <div className="ruler-line" />
-                  <span className="ruler-time">{time}s</span>
-                </div>
-              )
-            })}
+          <div className={styles.timeRuler}>
+            {rulerMarks.map(({ time, position, key }) => (
+              <div
+                key={key}
+                className={styles.rulerMark}
+                style={{ left: `${position}%` }}
+              >
+                <div className={styles.rulerLine} />
+                <span className={styles.rulerTime}>{time}s</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

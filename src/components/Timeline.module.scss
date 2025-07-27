@@ -1,16 +1,16 @@
-.timeline-container {
+.timelineContainer {
   background: #2a2a2a;
   padding: 15px 20px;
   border-top: 1px solid #444;
 }
 
-.timeline-header {
+.timelineHeader {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 10px;
 }
 
-.timeline-duration {
+.timelineDuration {
   background: #f39c12;
   color: white;
   padding: 4px 8px;
@@ -29,15 +29,32 @@
   padding: 10px;
 }
 
-.timeline-track {
+.timelineTrack {
   position: relative;
   height: 100%;
   background: #333;
   border-radius: 4px;
   overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.1) 2px,
+      rgba(255, 255, 255, 0.1) 4px
+    );
+    pointer-events: none;
+  }
 }
 
-.timeline-background {
+.timelineBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -46,7 +63,7 @@
   background: linear-gradient(90deg, #444 0%, #555 50%, #444 100%);
 }
 
-.trim-selection {
+.trimSelection {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -65,20 +82,20 @@
   z-index: 4;
   transform: translateX(-50%);
   transition: left 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 10px;
+    height: 10px;
+    background: #e74c3c;
+    border-radius: 50%;
+  }
 }
 
-.playhead::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: -4px;
-  width: 10px;
-  height: 10px;
-  background: #e74c3c;
-  border-radius: 50%;
-}
-
-.trim-handle {
+.trimHandle {
   position: absolute;
   top: -10px;
   bottom: -10px;
@@ -93,15 +110,23 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+
+  &:hover,
+  &.dragging {
+    background: #e67e22;
+    transform: translateX(-50%) scale(1.1);
+  }
+
+  &.left {
+    border-radius: 2px 0 0 2px;
+  }
+
+  &.right {
+    border-radius: 0 2px 2px 0;
+  }
 }
 
-.trim-handle:hover,
-.trim-handle.dragging {
-  background: #e67e22;
-  transform: translateX(-50%) scale(1.1);
-}
-
-.handle-line {
+.handleLine {
   width: 2px;
   height: 100%;
   background: #fff;
@@ -110,42 +135,35 @@
   transform: translateX(-50%);
 }
 
-.handle-grip {
+.handleGrip {
   width: 8px;
   height: 20px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 2px;
   position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 12px;
+    background: #fff;
+  }
+
+  &::before {
+    left: 40%;
+  }
+
+  &::after {
+    left: 60%;
+  }
 }
 
-.handle-grip::before,
-.handle-grip::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 12px;
-  background: #fff;
-}
 
-.handle-grip::before {
-  left: 40%;
-}
-
-.handle-grip::after {
-  left: 60%;
-}
-
-.trim-handle-left {
-  border-radius: 2px 0 0 2px;
-}
-
-.trim-handle-right {
-  border-radius: 0 2px 2px 0;
-}
-
-.time-ruler {
+.timeRuler {
   position: absolute;
   top: 0;
   left: 0;
@@ -154,7 +172,7 @@
   pointer-events: none;
 }
 
-.ruler-mark {
+.rulerMark {
   position: absolute;
   top: 0;
   height: 100%;
@@ -164,14 +182,14 @@
   transform: translateX(-50%);
 }
 
-.ruler-line {
+.rulerLine {
   width: 1px;
   height: 15px;
   background: #666;
   margin-top: auto;
 }
 
-.ruler-time {
+.rulerTime {
   font-size: 10px;
   color: #999;
   margin-top: 2px;
@@ -179,23 +197,6 @@
   font-family: monospace;
 }
 
-.timeline:hover .trim-handle {
+.timeline:hover .trimHandle {
   opacity: 1;
-}
-
-.timeline-track::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 2px,
-    rgba(255, 255, 255, 0.1) 2px,
-    rgba(255, 255, 255, 0.1) 4px
-  );
-  pointer-events: none;
 }

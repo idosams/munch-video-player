@@ -1,12 +1,16 @@
+import { Provider } from 'react-redux'
+import { store } from './store'
 import VideoPlayer from './components/VideoPlayer'
-import './App.css'
+import styles from './App.module.scss'
 
 function App() {
   return (
-    <div className="app">
-      <h1>Munch Video Player</h1>
-      <VideoPlayer />
-    </div>
+    <Provider store={store}>
+      <div className={styles.app}>
+        <h1>Munch Video Player</h1>
+        <VideoPlayer />
+      </div>
+    </Provider>
   )
 }
 

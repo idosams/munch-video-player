@@ -1,112 +1,35 @@
-import { useState, useRef, useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useVideoControls } from '../hooks/useVideoControls'
+import { formatTime } from '../utils/videoUtils'
 import Timeline from './Timeline'
-import './VideoPlayer.css'
+import styles from './VideoPlayer.module.scss'
 
 const VideoPlayer = () => {
-  const videoRef = useRef(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [trimStart, setTrimStart] = useState(0)
-  const [trimEnd, setTrimEnd] = useState(0)
-  const [videoSrc, setVideoSrc] = useState('')
+  const { videoRef, handlePlay, handleFileUpload, playTrimmedSection } = useVideoControls()
+  
+  const { videoSrc, currentTime, duration, trimStart, trimEnd } = useSelector(
+    (state) => state.videoData
+  )
+  const { isPlaying } = useSelector((state) => state.viewState)
 
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(video.currentTime)
-    }
-
-    const handleLoadedMetadata = () => {
-      setDuration(video.duration)
-      setTrimEnd(video.duration)
-    }
-
-    const handleEnded = () => {
-      setIsPlaying(false)
-    }
-
-    video.addEventListener('timeupdate', handleTimeUpdate)
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
-    video.addEventListener('ended', handleEnded)
-
-    return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate)
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      video.removeEventListener('ended', handleEnded)
-    }
-  }, [videoSrc])
-
-  const togglePlayPause = () => {
-    const video = videoRef.current
-    if (!video) return
-
-    if (isPlaying) {
-      video.pause()
-    } else {
-      video.play()
-    }
-    setIsPlaying(!isPlaying)
-  }
-
-  const handleSeek = (time) => {
-    const video = videoRef.current
-    if (!video) return
-
-    video.currentTime = time
-    setCurrentTime(time)
-  }
-
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-      const url = URL.createObjectURL(file)
-      setVideoSrc(url)
-      setCurrentTime(0)
-      setTrimStart(0)
-      setIsPlaying(false)
-    }
-  }
-
-  const handleTrimChange = (start, end) => {
-    setTrimStart(start)
-    setTrimEnd(end)
-  }
-
-  const playTrimmedSection = () => {
-    const video = videoRef.current
-    if (!video) return
-
-    video.currentTime = trimStart
-    video.play()
-    setIsPlaying(true)
-
-    const checkTrimEnd = () => {
-      if (video.currentTime >= trimEnd) {
-        video.pause()
-        setIsPlaying(false)
-        video.removeEventListener('timeupdate', checkTrimEnd)
-      }
-    }
-
-    video.addEventListener('timeupdate', checkTrimEnd)
+  const getTrimDuration = () => {
+    return (trimEnd - trimStart).toFixed(1)
   }
 
   return (
-    <div className="video-player">
-      <div className="video-container">
+    <div className={styles.videoPlayer}>
+      <div className={styles.videoContainer}>
         {!videoSrc ? (
-          <div className="upload-area">
+          <div className={styles.uploadArea}>
             <input
               type="file"
               accept="video/*"
               onChange={handleFileUpload}
-              className="file-input"
+              className={styles.fileInput}
               id="video-upload"
             />
-            <label htmlFor="video-upload" className="upload-label">
+            <label htmlFor="video-upload" className={styles.uploadLabel}>
               Choose Video File
             </label>
           </div>
@@ -114,23 +37,29 @@ const VideoPlayer = () => {
           <>
             <video
               ref={videoRef}
-              className="video-element"
+              className={styles.videoElement}
               src={videoSrc}
-              onClick={togglePlayPause}
+              onClick={handlePlay}
             />
-            <div className="video-overlay">
-              <div className="video-controls">
-                <button className="control-btn volume-btn">🔊</button>
-                <button onClick={togglePlayPause} className="control-btn play-btn">
+            <div className={styles.videoOverlay}>
+              <div className={styles.videoControls}>
+                <button className={styles.controlBtn} aria-label="Volume">
+                  🔊
+                </button>
+                <button 
+                  onClick={handlePlay} 
+                  className={styles.controlBtn}
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                >
                   {isPlaying ? '⏸️' : '▶️'}
                 </button>
-                <div className="time-display">
-                  <span className="current-time">
-                    {Math.floor(currentTime / 60).toString().padStart(2, '0')}:{Math.floor(currentTime % 60).toString().padStart(2, '0')}
+                <div className={styles.timeDisplay}>
+                  <span className={styles.currentTime}>
+                    {formatTime(currentTime)}
                   </span>
-                  <span className="separator">/</span>
-                  <span className="total-time">
-                    {Math.floor(duration / 60).toString().padStart(2, '0')}:{Math.floor(duration % 60).toString().padStart(2, '0')}
+                  <span className={styles.separator}>/</span>
+                  <span className={styles.totalTime}>
+                    {formatTime(duration)}
                   </span>
                 </div>
               </div>
@@ -141,21 +70,19 @@ const VideoPlayer = () => {
 
       {videoSrc && (
         <>
-          <Timeline
-            currentTime={currentTime}
-            duration={duration}
-            onSeek={handleSeek}
-            trimStart={trimStart}
-            trimEnd={trimEnd}
-            onTrimChange={handleTrimChange}
-          />
+          <Timeline />
           
-          <div className="trim-controls">
-            <button onClick={playTrimmedSection} className="trim-play-button">
+          <div className={styles.trimControls}>
+            <button 
+              onClick={playTrimmedSection} 
+              className={styles.trimPlayButton}
+            >
               Play Trimmed Section
             </button>
-            <div className="trim-info">
-              <span>Selection: {trimStart.toFixed(1)}s - {trimEnd.toFixed(1)}s ({(trimEnd - trimStart).toFixed(1)}s)</span>
+            <div className={styles.trimInfo}>
+              <span>
+                Selection: {trimStart.toFixed(1)}s - {trimEnd.toFixed(1)}s ({getTrimDuration()}s)
+              </span>
             </div>
           </div>
         </>
