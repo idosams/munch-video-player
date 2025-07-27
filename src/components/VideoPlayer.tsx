@@ -1,19 +1,21 @@
+import React from 'react'
 import { useSelector } from 'react-redux'
 import { useVideoControls } from '../hooks/useVideoControls'
 import { formatTime } from '../utils/videoUtils'
+import { RootState } from '../types'
 import Timeline from './Timeline'
 import styles from './VideoPlayer.module.scss'
 
-const VideoPlayer = () => {
+const VideoPlayer: React.FC = () => {
   const { videoRef, handlePlay, handleFileUpload, playTrimmedSection } = useVideoControls()
   
   const { videoSrc, currentTime, duration, trimStart, trimEnd } = useSelector(
-    (state) => state.videoData
+    (state: RootState) => state.videoData
   )
-  const { isPlaying } = useSelector((state) => state.viewState)
+  const { isPlaying } = useSelector((state: RootState) => state.viewState)
 
 
-  const getTrimDuration = () => {
+  const getTrimDuration = (): string => {
     return (trimEnd - trimStart).toFixed(1)
   }
 

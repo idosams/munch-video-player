@@ -1,8 +1,9 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { ViewState } from '../../types'
 
-const initialState = {
+const initialState: ViewState = {
   isPlaying: false,
-  isDragging: null, // 'start', 'end', or null
+  isDragging: null,
   showControls: true,
   isFullscreen: false,
   volume: 1,
@@ -16,36 +17,36 @@ const viewStateSlice = createSlice({
   name: 'viewState',
   initialState,
   reducers: {
-    setIsPlaying: (state, action) => {
+    setIsPlaying: (state, action: PayloadAction<boolean>) => {
       state.isPlaying = action.payload
     },
     togglePlayPause: (state) => {
       state.isPlaying = !state.isPlaying
     },
-    setIsDragging: (state, action) => {
+    setIsDragging: (state, action: PayloadAction<'start' | 'end' | null>) => {
       state.isDragging = action.payload
     },
-    setShowControls: (state, action) => {
+    setShowControls: (state, action: PayloadAction<boolean>) => {
       state.showControls = action.payload
     },
     toggleFullscreen: (state) => {
       state.isFullscreen = !state.isFullscreen
     },
-    setVolume: (state, action) => {
+    setVolume: (state, action: PayloadAction<number>) => {
       state.volume = Math.max(0, Math.min(1, action.payload))
       state.isMuted = state.volume === 0
     },
     toggleMute: (state) => {
       state.isMuted = !state.isMuted
     },
-    setPlaybackRate: (state, action) => {
+    setPlaybackRate: (state, action: PayloadAction<number>) => {
       state.playbackRate = action.payload
     },
-    setError: (state, action) => {
+    setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload
       state.loading = false
     },
-    setLoading: (state, action) => {
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload
       if (action.payload) {
         state.error = null

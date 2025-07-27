@@ -1,21 +1,22 @@
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { setIsDragging } from '../store/slices/viewStateSlice'
 import { useVideoControls } from '../hooks/useVideoControls'
 import { formatTime, generateRulerMarks } from '../utils/videoUtils'
+import { RootState } from '../types'
 import styles from './Timeline.module.scss'
 
-const Timeline = () => {
+const Timeline: React.FC = () => {
   const dispatch = useDispatch()
-  const timelineRef = useRef(null)
+  const timelineRef = useRef<HTMLDivElement>(null)
   const { handleSeek, handleTrimChange } = useVideoControls()
   
   const { currentTime, duration, trimStart, trimEnd } = useSelector(
-    (state) => state.videoData
+    (state: RootState) => state.videoData
   )
-  const { isDragging } = useSelector((state) => state.viewState)
+  const { isDragging } = useSelector((state: RootState) => state.viewState)
 
-  const handleTimelineClick = (event) => {
+  const handleTimelineClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const timeline = timelineRef.current
     if (!timeline || !duration) return
 
@@ -28,12 +29,12 @@ const Timeline = () => {
     handleSeek(Math.max(0, Math.min(duration, newTime)))
   }
 
-  const handleTrimHandleMouseDown = (event, handle) => {
+  const handleTrimHandleMouseDown = (event: React.MouseEvent<HTMLDivElement>, handle: 'start' | 'end') => {
     event.preventDefault()
     event.stopPropagation()
     dispatch(setIsDragging(handle))
     
-    const handleMouseMove = (moveEvent) => {
+    const handleMouseMove = (moveEvent: MouseEvent) => {
       if (!timelineRef.current || !duration) return
 
       const rect = timelineRef.current.getBoundingClientRect()
@@ -61,9 +62,9 @@ const Timeline = () => {
   }
 
 
-  const progressPercentage = duration ? (currentTime / duration) * 100 : 0
-  const trimStartPercentage = duration ? (trimStart / duration) * 100 : 0
-  const trimEndPercentage = duration ? (trimEnd / duration) * 100 : 0
+  const progressPercentage: number = duration ? (currentTime / duration) * 100 : 0
+  const trimStartPercentage: number = duration ? (trimStart / duration) * 100 : 0
+  const trimEndPercentage: number = duration ? (trimEnd / duration) * 100 : 0
 
   const rulerMarks = generateRulerMarks(duration)
 

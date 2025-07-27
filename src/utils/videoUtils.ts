@@ -1,9 +1,11 @@
+import { TrimRange, RulerMark } from '../types'
+
 /**
  * Format time in seconds to MM:SS format
- * @param {number} time - Time in seconds
- * @returns {string} Formatted time string
+ * @param time - Time in seconds
+ * @returns Formatted time string
  */
-export const formatTime = (time) => {
+export const formatTime = (time: number): string => {
   if (!time || isNaN(time)) return '00:00'
   
   const minutes = Math.floor(time / 60)
@@ -13,10 +15,10 @@ export const formatTime = (time) => {
 
 /**
  * Format time in seconds to HH:MM:SS format for longer videos
- * @param {number} time - Time in seconds
- * @returns {string} Formatted time string
+ * @param time - Time in seconds
+ * @returns Formatted time string
  */
-export const formatTimeWithHours = (time) => {
+export const formatTimeWithHours = (time: number): string => {
   if (!time || isNaN(time)) return '00:00:00'
   
   const hours = Math.floor(time / 3600)
@@ -32,45 +34,45 @@ export const formatTimeWithHours = (time) => {
 
 /**
  * Clamp a value between min and max
- * @param {number} value - Value to clamp
- * @param {number} min - Minimum value
- * @param {number} max - Maximum value
- * @returns {number} Clamped value
+ * @param value - Value to clamp
+ * @param min - Minimum value
+ * @param max - Maximum value
+ * @returns Clamped value
  */
-export const clamp = (value, min, max) => {
+export const clamp = (value: number, min: number, max: number): number => {
   return Math.max(min, Math.min(max, value))
 }
 
 /**
  * Convert percentage to time
- * @param {number} percentage - Percentage (0-100)
- * @param {number} duration - Total duration in seconds
- * @returns {number} Time in seconds
+ * @param percentage - Percentage (0-100)
+ * @param duration - Total duration in seconds
+ * @returns Time in seconds
  */
-export const percentageToTime = (percentage, duration) => {
+export const percentageToTime = (percentage: number, duration: number): number => {
   return (percentage / 100) * duration
 }
 
 /**
  * Convert time to percentage
- * @param {number} time - Time in seconds
- * @param {number} duration - Total duration in seconds
- * @returns {number} Percentage (0-100)
+ * @param time - Time in seconds
+ * @param duration - Total duration in seconds
+ * @returns Percentage (0-100)
  */
-export const timeToPercentage = (time, duration) => {
+export const timeToPercentage = (time: number, duration: number): number => {
   if (!duration) return 0
   return (time / duration) * 100
 }
 
 /**
  * Validate trim range
- * @param {number} start - Start time
- * @param {number} end - End time
- * @param {number} duration - Video duration
- * @param {number} minGap - Minimum gap between start and end
- * @returns {object} Validated trim range
+ * @param start - Start time
+ * @param end - End time
+ * @param duration - Video duration
+ * @param minGap - Minimum gap between start and end
+ * @returns Validated trim range
  */
-export const validateTrimRange = (start, end, duration, minGap = 0.1) => {
+export const validateTrimRange = (start: number, end: number, duration: number, minGap: number = 0.1): TrimRange => {
   const clampedStart = clamp(start, 0, duration - minGap)
   const clampedEnd = clamp(end, clampedStart + minGap, duration)
   
@@ -82,14 +84,14 @@ export const validateTrimRange = (start, end, duration, minGap = 0.1) => {
 
 /**
  * Generate ruler marks for timeline
- * @param {number} duration - Video duration in seconds
- * @param {number} maxMarks - Maximum number of marks to show
- * @returns {Array} Array of ruler mark objects
+ * @param duration - Video duration in seconds
+ * @param maxMarks - Maximum number of marks to show
+ * @returns Array of ruler mark objects
  */
-export const generateRulerMarks = (duration, maxMarks = 10) => {
+export const generateRulerMarks = (duration: number, maxMarks: number = 10): RulerMark[] => {
   if (!duration) return []
   
-  const marks = []
+  const marks: RulerMark[] = []
   let interval = 1
   
   // Determine appropriate interval based on duration
@@ -116,18 +118,18 @@ export const generateRulerMarks = (duration, maxMarks = 10) => {
 
 /**
  * Create a video URL from file
- * @param {File} file - Video file
- * @returns {string} Object URL
+ * @param file - Video file
+ * @returns Object URL
  */
-export const createVideoURL = (file) => {
+export const createVideoURL = (file: File): string => {
   return URL.createObjectURL(file)
 }
 
 /**
  * Revoke video URL to free memory
- * @param {string} url - Object URL to revoke
+ * @param url - Object URL to revoke
  */
-export const revokeVideoURL = (url) => {
+export const revokeVideoURL = (url: string): void => {
   if (url && url.startsWith('blob:')) {
     URL.revokeObjectURL(url)
   }
@@ -135,10 +137,10 @@ export const revokeVideoURL = (url) => {
 
 /**
  * Check if file is a valid video format
- * @param {File} file - File to check
- * @returns {boolean} True if valid video file
+ * @param file - File to check
+ * @returns True if valid video file
  */
-export const isValidVideoFile = (file) => {
+export const isValidVideoFile = (file: File): boolean => {
   const validTypes = [
     'video/mp4',
     'video/webm',

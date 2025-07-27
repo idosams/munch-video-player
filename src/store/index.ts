@@ -11,11 +11,10 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['videoData/setVideoFile'],
-        ignoredPaths: ['videoData.videoFile', 'videoData.videoRef'],
+        ignoredPaths: ['videoData.videoFile'],
       },
     }),
 })
 
-// Types would be defined here in a TypeScript file
-// export type RootState = ReturnType<typeof store.getState>
-// export type AppDispatch = typeof store.dispatch
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

@@ -12,15 +12,16 @@ import {
   setError,
   setLoading,
 } from '../store/slices/viewStateSlice'
+import { RootState, UseVideoControlsReturn } from '../types'
 
-export const useVideoControls = () => {
+export const useVideoControls = (): UseVideoControlsReturn => {
   const dispatch = useDispatch()
-  const videoRef = useRef(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   
   const { videoSrc, trimStart, trimEnd } = useSelector(
-    (state) => state.videoData
+    (state: RootState) => state.videoData
   )
-  const { isPlaying } = useSelector((state) => state.viewState)
+  const { isPlaying } = useSelector((state: RootState) => state.viewState)
 
   useEffect(() => {
     const video = videoRef.current
@@ -75,7 +76,7 @@ export const useVideoControls = () => {
     dispatch(togglePlayPause())
   }, [isPlaying, dispatch])
 
-  const handleSeek = useCallback((time) => {
+  const handleSeek = useCallback((time: number) => {
     const video = videoRef.current
     if (!video) return
 
@@ -83,16 +84,17 @@ export const useVideoControls = () => {
     dispatch(setCurrentTime(time))
   }, [dispatch])
 
-  const handleFileUpload = useCallback((event) => {
-    const file = event.target.files[0]
-    if (file) {
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (files && files.length > 0) {
+      const file = files[0]
       const url = URL.createObjectURL(file)
       dispatch(setVideoFile({ file, url }))
       dispatch(setIsPlaying(false))
     }
   }, [dispatch])
 
-  const handleTrimChange = useCallback((start, end) => {
+  const handleTrimChange = useCallback((start: number, end: number) => {
     dispatch(setTrimRange({ start, end }))
   }, [dispatch])
 
