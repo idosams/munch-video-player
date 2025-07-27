@@ -11,6 +11,8 @@ const initialState: ViewState = {
   playbackRate: 1,
   error: null,
   loading: false,
+  isPreviewMode: true,
+  showOptionsMenu: false,
 }
 
 const viewStateSlice = createSlice({
@@ -55,6 +57,15 @@ const viewStateSlice = createSlice({
     clearError: (state) => {
       state.error = null
     },
+    setIsPreviewMode: (state, action: PayloadAction<boolean>) => {
+      state.isPreviewMode = action.payload
+    },
+    toggleOptionsMenu: (state) => {
+      state.showOptionsMenu = !state.showOptionsMenu
+    },
+    setShowOptionsMenu: (state, action: PayloadAction<boolean>) => {
+      state.showOptionsMenu = action.payload
+    },
     resetViewState: () => {
       return { ...initialState }
     },
@@ -73,7 +84,10 @@ export const {
   setError,
   setLoading,
   clearError,
+  setIsPreviewMode,
+  toggleOptionsMenu,
+  setShowOptionsMenu,
   resetViewState,
 } = viewStateSlice.actions
 
-export default viewStateSlice.reducer
+export const viewStateReducer = viewStateSlice.reducer

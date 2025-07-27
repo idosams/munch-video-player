@@ -1,96 +1,56 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useVideoControls } from '../hooks/useVideoControls'
-import { formatTime } from '../utils/videoUtils'
+import { setShowOptionsMenu } from '../store/slices/viewStateSlice'
 import { RootState } from '../types'
-import Timeline from './Timeline'
+import { Timeline } from './Timeline'
+import { OptionsMenu } from './OptionsMenu'
+import { VideoUpload } from './VideoUpload'
+import { VideoDisplay } from './VideoDisplay'
+import { TrimControls } from './TrimControls'
+import { VideoActions } from './VideoActions'
 import styles from './VideoPlayer.module.scss'
 
-const VideoPlayer: React.FC = () => {
-  const { videoRef, handlePlay, handleFileUpload, playTrimmedSection } = useVideoControls()
+export const VideoPlayer = () => {
+  const dispatch = useDispatch()
+  const { videoRef, handlePlay, handleFileUpload, playTrimmedSection, exitPreviewMode, removeVideo, downloadTrimmedVideo } = useVideoControls()
   
-  const { videoSrc, currentTime, duration, trimStart, trimEnd } = useSelector(
-    (state: RootState) => state.videoData
-  )
-  const { isPlaying } = useSelector((state: RootState) => state.viewState)
-
-
-  const getTrimDuration = (): string => {
-    return (trimEnd - trimStart).toFixed(1)
-  }
+  const { videoSrc } = useSelector((state: RootState) => state.videoData)
+  const { showOptionsMenu } = useSelector((state: RootState) => state.viewState)
 
   return (
     <div className={styles.videoPlayer}>
       <div className={styles.videoContainer}>
         {!videoSrc ? (
-          <div className={styles.uploadArea}>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleFileUpload}
-              className={styles.fileInput}
-              id="video-upload"
-            />
-            <label htmlFor="video-upload" className={styles.uploadLabel}>
-              Choose Video File
-            </label>
-          </div>
+          <VideoUpload onFileUpload={handleFileUpload} />
         ) : (
-          <>
-            <video
-              ref={videoRef}
-              className={styles.videoElement}
-              src={videoSrc}
-              onClick={handlePlay}
-            />
-            <div className={styles.videoOverlay}>
-              <div className={styles.videoControls}>
-                <button className={styles.controlBtn} aria-label="Volume">
-                  🔊
-                </button>
-                <button 
-                  onClick={handlePlay} 
-                  className={styles.controlBtn}
-                  aria-label={isPlaying ? 'Pause' : 'Play'}
-                >
-                  {isPlaying ? '⏸️' : '▶️'}
-                </button>
-                <div className={styles.timeDisplay}>
-                  <span className={styles.currentTime}>
-                    {formatTime(currentTime)}
-                  </span>
-                  <span className={styles.separator}>/</span>
-                  <span className={styles.totalTime}>
-                    {formatTime(duration)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </>
+          <VideoDisplay 
+            videoRef={videoRef}
+            videoSrc={videoSrc}
+            onPlay={handlePlay}
+          />
         )}
       </div>
 
       {videoSrc && (
         <>
-          <Timeline />
-          
-          <div className={styles.trimControls}>
-            <button 
-              onClick={playTrimmedSection} 
-              className={styles.trimPlayButton}
-            >
-              Play Trimmed Section
-            </button>
-            <div className={styles.trimInfo}>
-              <span>
-                Selection: {trimStart.toFixed(1)}s - {trimEnd.toFixed(1)}s ({getTrimDuration()}s)
-              </span>
-            </div>
-          </div>
+          <Timeline videoRef={videoRef} />
+          <TrimControls 
+            onPlayTrimmedSection={playTrimmedSection}
+            onExitPreviewMode={exitPreviewMode}
+          />
+          <VideoActions 
+            onRemoveVideo={removeVideo}
+            onFileUpload={handleFileUpload}
+            onDownloadTrimmedVideo={downloadTrimmedVideo}
+          />
         </>
       )}
+      
+      <OptionsMenu 
+        isOpen={showOptionsMenu} 
+        onClose={() => dispatch(setShowOptionsMenu(false))} 
+      />
     </div>
   )
 }
 
-export default VideoPlayer

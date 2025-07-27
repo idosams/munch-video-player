@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { VideoDataState, SetVideoFilePayload, SetTrimRangePayload } from '../../types'
+import { VideoDataState, SetVideoFilePayload, SetVideoFileWithStatePayload, SetTrimRangePayload } from '../../types'
 
 const initialState: VideoDataState = {
   videoSrc: '',
@@ -22,9 +22,19 @@ const videoDataSlice = createSlice({
       state.trimStart = 0
       state.isLoaded = false
     },
+    setVideoFileWithState: (state, action: PayloadAction<SetVideoFileWithStatePayload>) => {
+      state.videoFile = action.payload.file
+      state.videoSrc = action.payload.url
+      state.currentTime = action.payload.currentTime
+      state.trimStart = action.payload.trimStart
+      state.trimEnd = action.payload.trimEnd
+      state.isLoaded = false
+    },
     setDuration: (state, action: PayloadAction<number>) => {
       state.duration = action.payload
-      state.trimEnd = action.payload
+      if (state.trimEnd === 0) {
+        state.trimEnd = action.payload
+      }
       state.isLoaded = true
     },
     setCurrentTime: (state, action: PayloadAction<number>) => {
@@ -49,6 +59,7 @@ const videoDataSlice = createSlice({
 
 export const {
   setVideoFile,
+  setVideoFileWithState,
   setDuration,
   setCurrentTime,
   setTrimStart,
@@ -57,4 +68,4 @@ export const {
   resetVideo,
 } = videoDataSlice.actions
 
-export default videoDataSlice.reducer
+export const videoDataReducer = videoDataSlice.reducer

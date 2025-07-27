@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
-import videoDataReducer from './slices/videoDataSlice'
-import viewStateReducer from './slices/viewStateSlice'
+import { videoDataReducer } from './slices/videoDataSlice'
+import { viewStateReducer } from './slices/viewStateSlice'
+import { videoLibraryReducer } from './slices/videoLibrarySlice'
 
 export const store = configureStore({
   reducer: {
     videoData: videoDataReducer,
     viewState: viewStateReducer,
+    videoLibrary: videoLibraryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
